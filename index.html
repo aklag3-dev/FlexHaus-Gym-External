@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlexHaus — Your Spot's Still Here</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --carbon:#0E1116;
+  --chalk:#F5F5F2;
+  --chalk-dark:#e6e6e0;
+  --volt:#C6F24E;
+  --volt-dark:#a8d43a;
+  --volt-dim:#8ab820;
+  --ember:#FF5A3C;
+  --ember-light:#ff7a62;
+  --text:#0E1116;
+  --text-light:#5a5a6a;
+  --white:#ffffff;
+  --font:'Inter',-apple-system,sans-serif;
+  --radius:12px;
+  --max-w:1120px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:var(--font);
+  background:var(--chalk);
+  color:var(--text);
+  line-height:1.5;
+  min-height:100vh;
+}
+.container{max-width:var(--max-w);margin:0 auto;padding:0 24px;width:100%;}
+
+/* 3D canvas */
+#canvas-container{
+  position:fixed;top:0;left:0;
+  width:100vw;height:100vh;
+  z-index:0;
+  pointer-events:none;
+}
+#canvas-container canvas{display:block;width:100%;height:100%;}
+
+/* fallback overlay */
+#fallback-overlay{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  z-index:10;
+  background:var(--white);
+  border:1px solid var(--chalk-dark);
+  border-radius:var(--radius);
+  box-shadow:0 4px 20px rgba(14,17,22,0.08);
+  display:none;
+  align-items:center;
+  gap:10px;
+  padding:12px 20px;
+  max-width:calc(100vw - 40px);
+}
+#fallback-overlay span{font-size:0.82rem;color:var(--text-light);}
+#fallback-overlay .fb-link{
+  color:var(--ember);font-weight:700;font-size:0.82rem;text-decoration:none;white-space:nowrap;
+}
+#fallback-overlay .fb-link:hover{text-decoration:underline;}
+
+/* scroll content */
+.content{position:relative;z-index:2;pointer-events:none;}
+.scroll-section{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:60px 24px;
+  pointer-events:none;
+}
+.scroll-section *{pointer-events:auto;}
+.scroll-section:last-child{min-height:110vh;}
+
+/* scene 1: hero */
+.hero-text{text-align:center;max-width:600px;}
+.hero-text .eyebrow{
+  font-size:0.7rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:0.12em;color:var(--ember);margin-bottom:8px;
+}
+.hero-text h1{
+  font-size:clamp(2rem,5.5vw,3.6rem);
+  font-weight:900;
+  line-height:1.05;
+  letter-spacing:-0.03em;
+  color:var(--carbon);
+}
+.hero-text h1 .hl{color:var(--volt-dark);}
+.hero-text .sub{
+  font-size:1.05rem;color:var(--text-light);
+  margin:10px 0 24px;line-height:1.5;
+}
+.hero-text .hero-cta{
+  display:inline-block;padding:14px 36px;
+  background:var(--carbon);color:var(--volt);
+  border-radius:8px;text-decoration:none;
+  font-weight:700;font-size:0.95rem;
+  transition:all 0.2s;
+}
+.hero-text .hero-cta:hover{background:var(--volt);color:var(--carbon);}
+
+/* scene 3: proof panels */
+.panels{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+  max-width:780px;width:100%;
+}
+.panel{
+  background:var(--white);
+  border:1px solid var(--chalk-dark);
+  border-radius:var(--radius);
+  padding:24px 20px;
+  text-align:center;
+  box-shadow:0 2px 12px rgba(14,17,22,0.04);
+}
+.panel .icon{font-size:1.8rem;margin-bottom:8px;}
+.panel h3{font-size:0.95rem;font-weight:700;color:var(--carbon);margin-bottom:4px;}
+.panel p{font-size:0.8rem;color:var(--text-light);line-height:1.5;}
+.panel .stat-line{font-size:0.72rem;color:var(--ember);font-weight:600;margin-top:6px;}
+
+/* scene 4: booking */
+.form-section{max-width:500px;width:100%;margin:0 auto;}
+.form-card{
+  background:var(--white);
+  border:1px solid var(--chalk-dark);
+  border-radius:var(--radius);
+  padding:32px 28px;
+  box-shadow:0 4px 24px rgba(14,17,22,0.06);
+  position:relative;overflow:hidden;
+}
+.form-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--volt),var(--ember));
+}
+.form-card h2{
+  font-size:1.2rem;font-weight:800;
+  color:var(--carbon);margin-bottom:4px;
+}
+.form-card .form-sub{
+  font-size:0.82rem;color:var(--text-light);margin-bottom:18px;
+}
+.form-group{margin-bottom:14px;}
+.form-group label{
+  display:block;font-size:0.7rem;font-weight:600;
+  margin-bottom:3px;color:var(--text-light);
+  text-transform:uppercase;letter-spacing:0.04em;
+}
+.form-group input,.form-group select{
+  width:100%;padding:10px 14px;
+  border:1px solid var(--chalk-dark);border-radius:8px;
+  font-family:var(--font);font-size:0.88rem;
+  color:var(--text);background:var(--chalk);
+  transition:all 0.2s;
+}
+.form-group input:focus,.form-group select:focus{
+  outline:none;border-color:var(--volt);
+  box-shadow:0 0 0 3px rgba(198,242,78,0.2);
+  background:var(--white);
+}
+.form-group input::placeholder{color:var(--text-light);}
+.form-group select option{background:var(--white);}
+.form-group .error{font-size:0.7rem;color:var(--ember);margin-top:3px;display:none;}
+.form-group.invalid input,.form-group.invalid select{border-color:var(--ember);}
+.form-group.invalid .error{display:block;}
+
+.btn-submit{
+  width:100%;padding:12px;
+  background:var(--carbon);color:var(--volt);
+  border:none;border-radius:8px;
+  font-family:var(--font);font-size:0.95rem;font-weight:700;
+  cursor:pointer;transition:all 0.25s;
+}
+.btn-submit:hover{background:var(--volt);color:var(--carbon);}
+.btn-submit:disabled{opacity:0.4;cursor:not-allowed;}
+.form-footnote{
+  font-size:0.68rem;color:var(--text-light);
+  text-align:center;margin-top:10px;
+}
+
+.success-state{display:none;text-align:center;padding:16px 0;}
+.success-state .icon{font-size:2.6rem;margin-bottom:6px;}
+.success-state h3{font-size:1.15rem;font-weight:800;color:var(--volt-dark);margin-bottom:4px;}
+.success-state p{color:var(--text-light);font-size:0.82rem;}
+
+/* stat callout */
+.stat-callout{
+  text-align:center;max-width:520px;margin:0 auto;
+  padding:20px;background:var(--white);
+  border-radius:var(--radius);border:1px solid var(--chalk-dark);
+}
+.stat-callout .big-stat{
+  font-size:2.2rem;font-weight:900;color:var(--ember);
+  line-height:1;margin-bottom:4px;
+}
+.stat-callout p{font-size:0.82rem;color:var(--text-light);}
+
+/* scroll indicator */
+.scroll-indicator{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  z-index:3;text-align:center;
+  animation:fadeUp 2s infinite;
+}
+.scroll-indicator span{
+  display:block;font-size:0.6rem;text-transform:uppercase;
+  letter-spacing:0.12em;color:var(--text-light);margin-bottom:3px;
+}
+.scroll-indicator .arrow{font-size:1.1rem;color:var(--volt-dark);}
+@keyframes fadeUp{
+  0%,100%{opacity:0.3;transform:translateX(-50%) translateY(0);}
+  50%{opacity:1;transform:translateX(-50%) translateY(-5px);}
+}
+
+@media(prefers-reduced-motion:reduce){.scroll-indicator{display:none;}}
+@media(max-width:768px){
+  .panels{grid-template-columns:1fr;max-width:380px;}
+  .form-card{padding:24px 20px;}
+  .hero-text h1{font-size:clamp(1.6rem,7vw,2.2rem);}
+}
+</style>
+</head>
+<body>
+
+<div id="canvas-container" aria-hidden="true"></div>
+
+<div id="fallback-overlay">
+  <span>Full experience uses 3D graphics. <a href="#booking" class="fb-link">Skip to booking</a></span>
+</div>
+
+<div class="scroll-indicator" id="scrollIndicator">
+  <span>Scroll to come back</span>
+  <div class="arrow">&#8964;</div>
+</div>
+
+<div class="content" id="scrollContent">
+
+  <!-- Scene 1: Hero -->
+  <section class="scroll-section" id="scene-hero">
+    <div class="hero-text">
+      <div class="eyebrow">FlexHaus</div>
+      <h1>Your spot's<br><span class="hl">still here.</span></h1>
+      <p class="sub">Book your comeback class in one tap. No guilt. No catch. Just the workout you've been meaning to get back to.</p>
+      <a href="#booking" class="hero-cta">Book My Comeback Class</a>
+    </div>
+  </section>
+
+  <!-- Scene 3: Proof -->
+  <section class="scroll-section" id="scene-proof">
+    <div class="panels">
+      <div class="panel">
+        <div class="icon">&#128170;</div>
+        <h3>One class is all it takes</h3>
+        <p>The hardest part is walking through the door. After that, you remember why you joined.</p>
+      </div>
+      <div class="panel">
+        <div class="icon">&#128198;</div>
+        <h3>Your favourite class, ready</h3>
+        <p>We've got a spot in the class you always took &mdash; same coach, same time, saved for you.</p>
+      </div>
+      <div class="panel">
+        <div class="icon">&#129309;</div>
+        <h3>No shame. Just welcome.</h3>
+        <p>We remember your name, not how long it's been. Come back whenever you're ready.</p>
+        <div class="stat-line">42% of members never book a second class. You're still here.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scene 4: Booking -->
+  <section class="scroll-section" id="booking">
+    <div class="form-section">
+      <div class="form-card">
+        <h2>Book your comeback class</h2>
+        <p class="form-sub">Free for members. One tap to reserve your spot.</p>
+
+        <form id="bookingForm" novalidate>
+          <div class="form-group" id="fg-name">
+            <label for="name">Your name</label>
+            <input type="text" id="name" placeholder="e.g. Alex" required>
+            <div class="error">Please enter your name</div>
+          </div>
+          <div class="form-group" id="fg-email">
+            <label for="email">Email or phone</label>
+            <input type="text" id="email" placeholder="alex@email.com" required>
+            <div class="error">Please enter your email or phone</div>
+          </div>
+          <div class="form-group" id="fg-class">
+            <label for="class">Pick your class</label>
+            <select id="class">
+              <option value="">Select a class</option>
+              <option>Spin &mdash; Thu 6:30 PM</option>
+              <option>Spin &mdash; Fri 7:15 AM</option>
+              <option>HIIT &mdash; Thu 6:30 PM</option>
+              <option>HIIT &mdash; Sat 9:00 AM</option>
+              <option>Yoga &mdash; Wed 7:15 AM</option>
+              <option>Yoga &mdash; Sun 10:30 AM</option>
+              <option>Strength &mdash; Mon 12:15 PM</option>
+              <option>Strength &mdash; Fri 5:30 PM</option>
+              <option>Pilates &mdash; Tue 9:00 AM</option>
+              <option>Boxing &mdash; Thu 7:00 PM</option>
+              <option>Mobility &mdash; Sun 9:00 AM</option>
+            </select>
+            <div class="error">Please select a class</div>
+          </div>
+          <button type="submit" class="btn-submit" id="submitBtn">Book My Spot</button>
+        </form>
+        <p class="form-footnote">We'll send you a confirmation. No spam, no catch. Opt out anytime.</p>
+
+        <div class="success-state" id="successState">
+          <div class="icon">&#9989;</div>
+          <h3>You're booked in!</h3>
+          <p>Check your email for the confirmation. See you at FlexHaus.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div style="height:40vh;"></div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+// --- Detect fallback conditions ---
+const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isFileProtocol = window.location.protocol === 'file:';
+const fallback = document.getElementById('fallback-overlay');
+
+function showFallback(){
+  fallback.style.display = 'flex';
+  const c = document.getElementById('canvas-container');
+  if(c) c.style.display = 'none';
+  document.getElementById('scrollIndicator').style.display = 'none';
+}
+
+if(prefersReduced || isFileProtocol){ showFallback(); }
+else {
+  try {
+    const tc = document.createElement('canvas');
+    const gl = tc.getContext('webgl') || tc.getContext('experimental-webgl');
+    if(!gl) { showFallback(); }
+    else { gl.getExtension('WEBGL_lose_context')?.loseContext(); }
+  } catch(e) { showFallback(); }
+}
+
+// --- Only init 3D if not in fallback ---
+if(fallback.style.display !== 'flex'){
+
+  const container = document.getElementById('canvas-container');
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xF5F5F2);
+  scene.fog = new THREE.Fog(0xF5F5F2, 12, 25);
+
+  const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 30);
+  camera.position.set(0, 0, 8);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.0;
+  container.appendChild(renderer.domElement);
+
+  // --- Lights ---
+  const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+  scene.add(ambient);
+  const keyLight = new THREE.DirectionalLight(0xffeedd, 1.2);
+  keyLight.position.set(3, 5, 4);
+  scene.add(keyLight);
+  const voltLight = new THREE.PointLight(0xC6F24E, 1.5, 15);
+  voltLight.position.set(1, 0, 3);
+  scene.add(voltLight);
+  const emberLight = new THREE.PointLight(0xFF5A3C, 0.8, 10);
+  emberLight.position.set(-2, -1, 5);
+  scene.add(emberLight);
+
+  // --- Gym structure (rings and bars) ---
+  const ringMat = new THREE.MeshStandardMaterial({ color: 0x0E1116, roughness: 0.4, metalness: 0.6, transparent: true, opacity: 0.15 });
+  const barMat = new THREE.MeshStandardMaterial({ color: 0x0E1116, roughness: 0.5, metalness: 0.3, transparent: true, opacity: 0.08 });
+
+  // Floating rings (rig frames)
+  const ringGeo = new THREE.TorusGeometry(1.2, 0.03, 12, 24);
+  const rings = [];
+  for(let i = 0; i < 12; i++){
+    const ring = new THREE.Mesh(ringGeo, ringMat.clone());
+    const angle = (i / 12) * Math.PI * 2;
+    const radius = 3 + Math.random() * 4;
+    ring.position.set(Math.cos(angle) * radius, (Math.random() - 0.5) * 4, Math.sin(angle) * radius);
+    ring.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+    const s = 0.5 + Math.random() * 1.5;
+    ring.scale.set(s, s, s);
+    scene.add(ring);
+    rings.push(ring);
+  }
+
+  // Vertical bars (rig posts)
+  const barGeo = new THREE.CylinderGeometry(0.02, 0.02, 2.5, 6);
+  for(let i = 0; i < 30; i++){
+    const bar = new THREE.Mesh(barGeo, barMat.clone());
+    bar.position.set((Math.random() - 0.5) * 10, (Math.random() - 0.5) * 4, (Math.random() - 0.5) * 10);
+    bar.rotation.set(Math.random() * 0.2, 0, Math.random() * 0.2);
+    scene.add(bar);
+  }
+
+  // --- Chalk-dust particles ---
+  const pCount = 1500;
+  const pGeo = new THREE.BufferGeometry();
+  const pPos = new Float32Array(pCount * 3);
+  const pSizes = new Float32Array(pCount);
+  for(let i = 0; i < pCount; i++){
+    pPos[i*3] = (Math.random() - 0.5) * 16;
+    pPos[i*3+1] = (Math.random() - 0.5) * 8;
+    pPos[i*3+2] = (Math.random() - 0.5) * 12;
+    pSizes[i] = 0.01 + Math.random() * 0.04;
+  }
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+  pGeo.setAttribute('size', new THREE.BufferAttribute(pSizes, 1));
+
+  const pMat = new THREE.PointsMaterial({
+    color: 0x0E1116,
+    size: 0.025,
+    transparent: true,
+    opacity: 0.15,
+    blending: THREE.NormalBlending,
+    depthWrite: false,
+    sizeAttenuation: true,
+  });
+  const particles = new THREE.Points(pGeo, pMat);
+  scene.add(particles);
+
+  // --- Heartbeat line ---
+  const hbPoints = [];
+  for(let i = 0; i < 100; i++){
+    const t = (i / 100) * Math.PI * 4;
+    const x = (i / 100 - 0.5) * 6;
+    const y = Math.sin(t) * (0.3 + 0.2 * Math.sin(t * 0.5));
+    hbPoints.push(new THREE.Vector3(x, y - 2.5, 0));
+  }
+  const hbGeo = new THREE.BufferGeometry().setFromPoints(hbPoints);
+  const hbMat = new THREE.LineBasicMaterial({ color: 0xC6F24E, linewidth: 2, transparent: true, opacity: 0.3 });
+  const heartbeat = new THREE.Line(hbGeo, hbMat);
+  scene.add(heartbeat);
+
+  // --- Camera keyframes ---
+  const kf = [
+    { pos: [0, 0, 8], target: [0, 0, 0] },      // hero
+    { pos: [0, 0.3, 6], target: [0, 0, 0] },
+    { pos: [1, 0.5, 4], target: [0, 0.2, 0] },   // momentum
+    { pos: [2, 0.2, 3.5], target: [0, 0, 0] },
+    { pos: [0, -0.3, 5], target: [0, -0.2, 0] }, // proof
+    { pos: [0, -0.8, 4], target: [0, -0.4, 0] },
+    { pos: [0, -1.2, 3], target: [0, -0.6, 0.3] }, // booking
+    { pos: [0, -1.5, 2.5], target: [0, -0.8, 0.5] },
+  ];
+
+  function getProgress(){
+    const sy = window.scrollY, ms = document.documentElement.scrollHeight - window.innerHeight;
+    return ms > 0 ? Math.min(sy / ms, 1) : 0;
+  }
+  function lerp(a,b,t){ return a + (b - a) * t; }
+  function lerpArr(a,b,t){ return [lerp(a[0],b[0],t), lerp(a[1],b[1],t), lerp(a[2],b[2],t)]; }
+  function smooth(t){ return t*t*(3-2*t); }
+
+  function updateCam(progress){
+    const tk = kf.length - 1, idx = Math.min(Math.floor(progress * tk), tk - 1);
+    const frac = smooth((progress * tk) - idx);
+    const a = kf[idx], b = kf[Math.min(idx+1, tk)];
+    const pos = lerpArr(a.pos, b.pos, frac);
+    const tgt = lerpArr(a.target, b.target, frac);
+    camera.position.set(pos[0], pos[1], pos[2]);
+    camera.lookAt(tgt[0], tgt[1], tgt[2]);
+  }
+
+  // --- Animate ---
+  const indicator = document.getElementById('scrollIndicator');
+  window.addEventListener('scroll', () => {
+    indicator.style.opacity = window.scrollY > 50 ? 0 : 1;
+  }, { passive: true });
+
+  let time = 0;
+  function render(){
+    requestAnimationFrame(render);
+    time += 1;
+    const p = getProgress();
+    updateCam(p);
+
+    // Rings rotate slowly
+    rings.forEach((r, i) => {
+      r.rotation.x += 0.002;
+      r.rotation.y += 0.003;
+    });
+
+    // Particles drift
+    const pos = particles.geometry.attributes.position.array;
+    for(let i = 0; i < pCount; i++){
+      pos[i*3] += Math.sin(time * 0.0003 + i * 0.1) * 0.0004;
+      pos[i*3+1] += Math.sin(time * 0.0004 + i * 0.05) * 0.0003;
+      pos[i*3+2] += Math.cos(time * 0.0003 + i * 0.08) * 0.0003;
+    }
+    particles.geometry.attributes.position.needsUpdate = true;
+
+    // Heartbeat pulse accelerates with scroll
+    const speed = 1 + p * 5;
+    heartbeat.material.opacity = 0.2 + p * 0.6;
+    const hbY = -2.5 + Math.sin(time * 0.003 * speed) * (0.3 + p * 0.4);
+    heartbeat.position.y = hbY + 2.5;
+
+    // Volt light pulses
+    voltLight.intensity = 1.2 + Math.sin(time * 0.02 + p * 3) * 0.5;
+
+    renderer.render(scene, camera);
+  }
+  render();
+
+  // CTA hash links
+  document.querySelectorAll('a[href="#booking"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+}
+
+// --- Form logic (works in both modes) ---
+(function(){
+  const form = document.getElementById('bookingForm');
+  if(!form) return;
+  const nameI = document.getElementById('name');
+  const emailI = document.getElementById('email');
+  const classI = document.getElementById('class');
+  const btn = document.getElementById('submitBtn');
+  const success = document.getElementById('successState');
+
+  function validate(inp, gid){
+    const g = document.getElementById(gid);
+    if(inp.validity.valid && inp.value.trim() !== ''){
+      g.classList.remove('invalid'); return true;
+    } else { g.classList.add('invalid'); return false; }
+  }
+  function validateClass(){
+    const g = document.getElementById('fg-class');
+    if(classI.value !== ''){ g.classList.remove('invalid'); return true; }
+    else { g.classList.add('invalid'); return false; }
+  }
+
+  nameI.addEventListener('input', () => validate(nameI, 'fg-name'));
+  emailI.addEventListener('input', () => validate(emailI, 'fg-email'));
+  classI.addEventListener('change', validateClass);
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    const vn = validate(nameI, 'fg-name');
+    const ve = validate(emailI, 'fg-email');
+    const vc = validateClass();
+    if(vn && ve && vc){
+      const data = { name: nameI.value.trim(), email: emailI.value.trim(), class: classI.value };
+      console.log('Comeback booking:', data);
+      btn.disabled = true; btn.textContent = 'Booking...';
+      setTimeout(() => {
+        form.style.display = 'none';
+        document.querySelector('.form-footnote').style.display = 'none';
+        success.style.display = 'block';
+      }, 800);
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
